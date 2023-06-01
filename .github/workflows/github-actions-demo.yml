@@ -16,5 +16,27 @@ jobs:
         run: |
           ls ${{ github.workspace }}
       - run: echo "🍏 This job's status is ${{ job.status }}."
-      - name: Test secrets
-        run: echo ${{ secrets.SSH_KEY }}
+  Clone_Job:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v2
+        
+      - name: Set up SSH key
+        env:
+          SSH_PRIVATE_KEY: ${{ secrets.SSH_KEY }}
+        run: |
+          mkdir -p ~/.ssh
+          echo "$SSH_PRIVATE_KEY" > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+          ssh-keyscan github.com >> ~/.ssh/known_hosts
+          ssh-keyscan bitbucket.org >> ~/.ssh/known_hosts
+
+      - name: Clone repository
+        env:
+          REPO_URL: ${{secrets.REPO_URL}}
+        run: |
+          git clone $REPO_URL
+          # Additional steps as needed
+  
+
